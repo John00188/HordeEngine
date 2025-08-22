@@ -1,0 +1,33 @@
+name: Build HordeEngine
+
+on:
+  push:
+    tags:
+      - 'v*'   # triggers only when you push a version tag like v0.2.0
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Build DLLs
+      run: |
+        mkdir build
+        cd build
+        cmake .. -A x64
+        cmake --build . --config Release
+
+    - name: Upload Release Assets
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          build/Release/gmcl_hordeengine_win64.dll
+          build/Release/gmsv_hordeengine_win64.dll
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
