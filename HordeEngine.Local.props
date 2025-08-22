@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- HordeEngine.Local.props (pre-filled for your E: install) -->
+  <PropertyGroup Label="UserMacros">
+    <GMOD_ROOT>E:\SteamLibrary\steamapps\common\GarrysMod</GMOD_ROOT>
+    <GARRYSMOD_COMMON_DIR>E:\dev\garrysmod_common</GARRYSMOD_COMMON_DIR>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <_PropertySheetDisplayName>HordeEngine Local (GMOD/E: paths)</_PropertySheetDisplayName>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(GARRYSMOD_COMMON_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+
+    <Link>
+      <AdditionalLibraryDirectories>$(GMOD_ROOT)\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>lua_shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+
+    <PostBuildEvent>
+      <Command>
+if not exist "$(GMOD_ROOT)\garrysmod\lua\bin" mkdir "$(GMOD_ROOT)\garrysmod\lua\bin"
+copy /Y "$(TargetPath)" "$(GMOD_ROOT)\garrysmod\lua\bin\"
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+</Project>

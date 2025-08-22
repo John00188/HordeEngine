@@ -1,0 +1,18 @@
+﻿# Build artifacts
+/build/
+/Release/
+/Debug/
+*.dll
+*.lib
+*.exp
+*.pdb
+*.ilk
+*.log
+
+# Visual Studio
+.vs/
+*.VC.db
+*.VC.opendb
+*.suo
+*.user
+*.ipch

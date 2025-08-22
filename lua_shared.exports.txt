@@ -1,0 +1,178 @@
+Microsoft (R) COFF/PE Dumper Version 14.44.35214.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file lua_shared.dll
+
+File Type: DLL
+
+  Section contains the following exports for lua_shared.dll
+
+    00000000 characteristics
+    FFFFFFFF time date stamp
+        0.00 version
+           1 ordinal base
+         151 number of functions
+         151 number of names
+
+    ordinal hint RVA      name
+
+          1    0 00006C10 ?AdvancedLuaErrorReporter@@YAHPAUlua_State@@@Z
+          2    1 000A9FB8 ?g_pFullFileSystem@@3PAVIFileSystem@@A
+          3    2 0004CB90 CreateInterface
+          4    3 00017720 GMOD_LoadBinaryModule
+          5    4 000A8C5C cvar
+          6    5 00021C10 luaJIT_profile_dumpstack
+          7    6 00021C60 luaJIT_profile_start
+          8    7 00021DE0 luaJIT_profile_stop
+          9    8 00018D10 luaJIT_setmode
+         10    9 00006060 luaJIT_version_2_1_0_beta3
+         11    A 00017C20 luaL_addlstring
+         12    B 00017C90 luaL_addstring
+         13    C 00017CC0 luaL_addvalue
+         14    D 00013590 luaL_argerror
+         15    E 00017D40 luaL_buffinit
+         16    F 000138A0 luaL_callmeta
+         17   10 00013900 luaL_checkany
+         18   11 00013940 luaL_checkinteger
+         19   12 000139A0 luaL_checklstring
+         20   13 00013A20 luaL_checknumber
+         21   14 00013A70 luaL_checkoption
+         22   15 00013B40 luaL_checkstack
+         23   16 00013B90 luaL_checktype
+         24   17 00013C00 luaL_checkudata
+         25   18 000135B0 luaL_error
+         26   19 00017D60 luaL_execresult
+         27   1A 00017E10 luaL_fileresult
+         28   1B 00017EA0 luaL_findtable
+         29   1C 00013C30 luaL_getmetafield
+         30   1D 00017F90 luaL_gsub
+         31   1E 00015A90 luaL_loadbuffer
+         32   1F 00015B50 luaL_loadbufferx
+         33   20 00015C10 luaL_loadfile
+         34   21 00015C30 luaL_loadfilex
+         35   22 00015E10 luaL_loadstring
+         36   23 00013CA0 luaL_newmetatable
+         37   24 00013E80 luaL_newmetatable_type
+         38   25 000180E0 luaL_newstate
+         39   26 00018110 luaL_openlib
+         40   27 00017B50 luaL_openlibs
+         41   28 00013EB0 luaL_optinteger
+         42   29 00013F20 luaL_optlstring
+         43   2A 00013FD0 luaL_optnumber
+         44   2B 00018190 luaL_prepbuffer
+         45   2C 000181C0 luaL_pushmodule
+         46   2D 00018250 luaL_pushresult
+         47   2E 00018290 luaL_ref
+         48   2F 00018340 luaL_register
+         49   30 000183A0 luaL_setfuncs
+         50   31 00014030 luaL_setmetatable
+         51   32 00014060 luaL_testudata
+         52   33 00017160 luaL_traceback
+         53   34 000135D0 luaL_typerror
+         54   35 00018430 luaL_unref
+         55   36 000135F0 luaL_where
+         56   37 00013640 lua_atpanic
+         57   38 000140D0 lua_call
+         58   39 00014100 lua_checkstack
+         59   3A 00012890 lua_close
+         60   3B 00014150 lua_concat
+         61   3C 00014200 lua_copy
+         62   3D 00014230 lua_cpcall
+         63   3E 00014270 lua_createtable
+         64   3F 00015EE0 lua_dump
+         65   40 000142C0 lua_equal
+         66   41 00013660 lua_error
+         67   42 00014380 lua_gc
+         68   43 000144A0 lua_getallocf
+         69   44 000144C0 lua_getfenv
+         70   45 00014540 lua_getfield
+         71   46 00018F10 lua_gethook
+         72   47 00018F20 lua_gethookcount
+         73   48 00018F30 lua_gethookmask
+         74   49 000173F0 lua_getinfo
+         75   4A 00017410 lua_getlocal
+         76   4B 000145E0 lua_getmetatable
+         77   4C 000174B0 lua_getstack
+         78   4D 00014660 lua_gettable
+         79   4E 000146D0 lua_gettop
+         80   4F 000146E0 lua_getupvalue
+         81   50 00014740 lua_insert
+         82   51 000147A0 lua_iscfunction
+         83   52 000147D0 lua_isnumber
+         84   53 00014820 lua_isstring
+         85   54 00014850 lua_isuserdata
+         86   55 00014880 lua_isyieldable
+         87   56 00014890 lua_lessthan
+         88   57 00015F20 lua_load
+         89   58 00015FD0 lua_loadx
+         90   59 000129C0 lua_newstate
+         91   5A 00014920 lua_newthread
+         92   5B 00014970 lua_newuserdata
+         93   5C 000149F0 lua_next
+         94   5D 00014A40 lua_objlen
+         95   5E 00014AA0 lua_pcall
+         96   5F 00014B20 lua_pushboolean
+         97   60 00014B50 lua_pushcclosure
+         98   61 00014BE0 lua_pushfstring
+         99   62 00014C10 lua_pushinteger
+        100   63 00014C40 lua_pushlightuserdata
+        101   64 00014C70 lua_pushlstring
+        102   65 00014CC0 lua_pushnil
+        103   66 00014CE0 lua_pushnumber
+        104   67 00014D30 lua_pushstring
+        105   68 00014DA0 lua_pushthread
+        106   69 00014DE0 lua_pushvalue
+        107   6A 00014E20 lua_pushvfstring
+        108   6B 00014E50 lua_rawequal
+        109   6C 00014E90 lua_rawget
+        110   6D 00014ED0 lua_rawgeti
+        111   6E 00014F30 lua_rawset
+        112   6F 00014F80 lua_rawseti
+        113   70 00014FF0 lua_remove
+        114   71 00015050 lua_replace
+        115   72 00015070 lua_resume_real
+        116   73 000150E0 lua_setallocf
+        117   74 00015100 lua_setfenv
+        118   75 00015180 lua_setfield
+        119   76 00018F40 lua_sethook
+        120   77 00017500 lua_setlocal
+        121   78 00015220 lua_setmetatable
+        122   79 00015350 lua_settable
+        123   7A 000153B0 lua_settop
+        124   7B 00015420 lua_setupvalue
+        125   7C 000154A0 lua_status
+        126   7D 000154B0 lua_toboolean
+        127   7E 000154D0 lua_tocfunction
+        128   7F 00015510 lua_tointeger
+        129   80 00015570 lua_tointegerx
+        130   81 000155E0 lua_tolstring
+        131   82 00015660 lua_tonumber
+        132   83 000156B0 lua_tonumberx
+        133   84 00015720 lua_topointer
+        134   85 00015740 lua_tothread
+        135   86 00015760 lua_touserdata
+        136   87 00015790 lua_type
+        137   88 000157F0 lua_typename
+        138   89 00015820 lua_upvalueid
+        139   8A 00015850 lua_upvaluejoin
+        140   8B 000158A0 lua_version
+        141   8C 000158B0 lua_xmove
+        142   8D 00015910 lua_yield
+        143   8E 0002D630 luaopen_base
+        144   8F 00030E40 luaopen_bit
+        145   90 00030C60 luaopen_debug
+        146   91 00031660 luaopen_jit
+        147   92 0002DA50 luaopen_math
+        148   93 0002FF30 luaopen_os
+        149   94 000179D0 luaopen_package
+        150   95 0002E6A0 luaopen_string
+        151   96 0002F8A0 luaopen_table
+
+  Summary
+
+       17000 .data
+       1B000 .rdata
+        4000 .reloc
+        1000 .rsrc
+       78000 .text

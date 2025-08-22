@@ -1,0 +1,4 @@
+LIBRARY gmsv_hordeengine_win64
+EXPORTS
+    gmod13_open
+    gmod13_close

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7E3F4C20-7788-4B44-9B88-1A2B3C4D5E6F}</ProjectGuid>
+    <RootNamespace>gmsv_hordeengine_win64</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <!-- import your E:\ overrides -->
+  <Import Project="HordeEngine.Local.props" Condition="Exists('HordeEngine.Local.props')" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <!-- Debug output locations -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetName>gmsv_hordeengine_win64</TargetName>
+    <OutDir>$(SolutionDir)bin\server\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>build\$(Configuration)\obj\$(ProjectName)\</IntDir>
+    <IncludePath>E:\hordeengine\external\include;E:\hordeengine\deps\garrysmod_common\include;$(IncludePath)</IncludePath>
+    <!-- Removed old hard-coded LibraryPath; we use AdditionalLibraryDirectories -->
+  </PropertyGroup>
+  <!-- Release output locations -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>gmsv_hordeengine_win64</TargetName>
+    <OutDir>$(SolutionDir)bin\server\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>build\$(Configuration)\obj\$(ProjectName)\</IntDir>
+    <IncludePath>E:\hordeengine\external\include;E:\hordeengine\deps\garrysmod_common\include;$(IncludePath)</IncludePath>
+    <LinkIncremental>true</LinkIncremental>
+    <!-- Removed old hard-coded LibraryPath; we use AdditionalLibraryDirectories -->
+    <!-- If you need global include search path, keep it; otherwise rely on AdditionalIncludeDirectories -->
+    <!-- <IncludePath>E:\hordeengine\deps\garrysmod_common\include;E:\hordeengine\deps\garrysmod_common\include\GarrysMod;E:\hordeengine\engine\include;E:\hordeengine\external\include;$(IncludePath)</IncludePath> -->
+  </PropertyGroup>
+  <!-- Debug compile/link -->
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;GMMODULE;HE_HAS_IMPL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <CompileAs>CompileAsCpp</CompileAs>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>lua_shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(GMOD_ROOT)\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <OutputFile>$(OutDir)gmsv_hordeengine_win64.dll</OutputFile>
+      <ModuleDefinitionFile>module.def</ModuleDefinitionFile>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y "$(TargetPath)" "E:\SteamLibrary\steamapps\common\GarrysMod\garrysmod\lua\bin\"</Command>
+      <Message>Copying HordeEngine to GMod</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <!-- Release compile/link -->
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;GMMODULE;HE_STUB=1;GMOD_SERVER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <ShowIncludes>true</ShowIncludes>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <CompileAs>CompileAsCpp</CompileAs>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>lua_shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>E:\SteamLibrary\steamapps\common\GarrysMod\bin\win64;$(GMOD_ROOT)\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <OutputFile>$(OutDir)gmsv_hordeengine_win64.dll</OutputFile>
+      <ModuleDefinitionFile>module.def</ModuleDefinitionFile>
+      <AdditionalOptions>/EXPORT:gmod13_open /EXPORT:gmod13_close
+ /LTCG:OFF %(AdditionalOptions)</AdditionalOptions>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+      <NoEntryPoint>true</NoEntryPoint>
+    </Link>
+    <PostBuildEvent>
+      <Command>echo Copying $(TargetPath) to lua\bin
+xcopy /Y "$(TargetPath)" "E:\SteamLibrary\steamapps\common\GarrysMod\garrysmod\lua\bin\"
+</Command>
+      <Message>Copying HordeEngine to GMod</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="E:\hordeengine\gmsv_hordeengine_win64\src\shm_client.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="he_api.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="hordeengine_server.cpp" />
+    <ClCompile Include="net_shm.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="minimal_only.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="external\include\net_shm.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="he_api.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="module.def">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </None>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>
