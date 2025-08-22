@@ -2,8 +2,8 @@ name: Build HordeEngine
 
 on:
   push:
-    tags:
-      - 'v*'   # triggers only when you push a version tag like v0.2.0
+    tags: ['v*']     # runs when you push a tag like v0.2.1
+  workflow_dispatch:  # lets you run it manually from the Actions tab
 
 jobs:
   build:
@@ -11,23 +11,34 @@ jobs:
 
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Setup MSVC
-      uses: ilammy/msvc-dev-cmd@v1
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
 
-    - name: Build DLLs
+    - name: Locate project files
+      shell: pwsh
       run: |
-        mkdir build
-        cd build
-        cmake .. -A x64
-        cmake --build . --config Release
+        $client = Get-ChildItem -Recurse -Filter 'gmcl_hordeengine_win64.vcxproj' | Select-Object -First 1 -ExpandProperty FullName
+        $server = Get-ChildItem -Recurse -Filter 'gmsv_hordeengine_win64.vcxproj' | Select-Object -First 1 -ExpandProperty FullName
+        if (-not $client) { throw "Could not find gmcl_hordeengine_win64.vcxproj" }
+        if (-not $server) { throw "Could not find gmsv_hordeengine_win64.vcxproj" }
+        "CLIENT=$client" | Out-File -FilePath $Env:GITHUB_ENV -Append
+        "SERVER=$server" | Out-File -FilePath $Env:GITHUB_ENV -Append
+
+    - name: Build Client DLL (Release x64)
+      shell: pwsh
+      run: msbuild "$env:CLIENT" /m /p:Configuration=Release /p:Platform=x64
+
+    - name: Build Server DLL (Release x64)
+      shell: pwsh
+      run: msbuild "$env:SERVER" /m /p:Configuration=Release /p:Platform=x64
 
     - name: Upload Release Assets
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          build/Release/gmcl_hordeengine_win64.dll
-          build/Release/gmsv_hordeengine_win64.dll
+          **/Release/gmcl_hordeengine_win64.dll
+          **/Release/gmsv_hordeengine_win64.dll
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
