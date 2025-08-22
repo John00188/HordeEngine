@@ -2,8 +2,8 @@ name: Build HordeEngine
 
 on:
   push:
-    tags: ['v*']     # runs when you push a tag like v0.2.1
-  workflow_dispatch:  # lets you run it manually from the Actions tab
+    tags: ['v*']
+  workflow_dispatch:
 
 jobs:
   build:
@@ -42,3 +42,4 @@ jobs:
           **/Release/gmsv_hordeengine_win64.dll
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
