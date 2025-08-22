@@ -1,0 +1,4 @@
+[submodule "dev/gmod-module-base"]
+	path = dev/gmod-module-base
+	url = https://github.com/Facepunch/gmod-module-base.git
+	branch = development
