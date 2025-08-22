@@ -16,30 +16,43 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    - name: Locate project files
+    - name: Discover projects
+      id: discover
       shell: pwsh
       run: |
         $client = Get-ChildItem -Recurse -Filter 'gmcl_hordeengine_win64.vcxproj' | Select-Object -First 1 -ExpandProperty FullName
         $server = Get-ChildItem -Recurse -Filter 'gmsv_hordeengine_win64.vcxproj' | Select-Object -First 1 -ExpandProperty FullName
-        if (-not $client) { throw "Could not find gmcl_hordeengine_win64.vcxproj" }
-        if (-not $server) { throw "Could not find gmsv_hordeengine_win64.vcxproj" }
-        "CLIENT=$client" | Out-File -FilePath $Env:GITHUB_ENV -Append
-        "SERVER=$server" | Out-File -FilePath $Env:GITHUB_ENV -Append
+
+        if ($client) { "CLIENT=$client" | Out-File -Append -FilePath $env:GITHUB_ENV; "HAS_CLIENT=true" | Out-File -Append -FilePath $env:GITHUB_ENV }
+        else { "HAS_CLIENT=false" | Out-File -Append -FilePath $env:GITHUB_ENV }
+
+        if ($server) { "SERVER=$server" | Out-File -Append -FilePath $env:GITHUB_ENV; "HAS_SERVER=true" | Out-File -Append -FilePath $env:GITHUB_ENV }
+        else { "HAS_SERVER=false" | Out-File -Append -FilePath $env:GITHUB_ENV }
+
+        if (-not $client -and -not $server) { throw "No .vcxproj files found." }
 
     - name: Build Client DLL (Release x64)
+      if: env.HAS_CLIENT == 'true'
       shell: pwsh
       run: msbuild "$env:CLIENT" /m /p:Configuration=Release /p:Platform=x64
 
     - name: Build Server DLL (Release x64)
+      if: env.HAS_SERVER == 'true'
       shell: pwsh
       run: msbuild "$env:SERVER" /m /p:Configuration=Release /p:Platform=x64
 
-    - name: Upload Release Assets
+    - name: Upload client DLL
+      if: env.HAS_CLIENT == 'true'
       uses: softprops/action-gh-release@v1
       with:
-        files: |
-          **/Release/gmcl_hordeengine_win64.dll
-          **/Release/gmsv_hordeengine_win64.dll
+        files: "**/Release/gmcl_hordeengine_win64.dll"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Upload server DLL
+      if: env.HAS_SERVER == 'true'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: "**/Release/gmsv_hordeengine_win64.dll"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
