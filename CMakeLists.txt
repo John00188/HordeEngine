@@ -1,51 +1,54 @@
 cmake_minimum_required(VERSION 3.20)
-project(HordeEngine_Improvementinator CXX)
+project(HordeEngine LANGUAGES CXX)
 
-# Force default build type to Release if not specified for single-config generators
-if(NOT CMAKE_CONFIGURATION_TYPES)
-    if(NOT CMAKE_BUILD_TYPE)
-        message(STATUS "No build type selected, defaulting to Release")
-        set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
-    endif()
-else()
-    # For multi-config generators, set default build type to Release
-    set(CMAKE_DEFAULT_BUILD_TYPE "Release")
-endif()
-
+# --- Language standard ---
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Option: where the Facepunch headers live (relative to this project)
-# You can change this to your local path.
-set(GMOD_MODULE_BASE_INCLUDE "${CMAKE_SOURCE_DIR}/dev/gmod-module-base/include" CACHE PATH "Path to gmod-module-base/include")
-
-include_directories("${GMOD_MODULE_BASE_INCLUDE}")
-
-add_definitions(-DGMOD_ALLOW_DEPRECATED)
-
-# Shared core
-add_library(he_core STATIC
-    src/core/he_core.cpp
+# --- Fetch Facepunch gmod-module-base headers ---
+include(FetchContent)
+FetchContent_Declare(
+  gmod-module-base
+  GIT_REPOSITORY https://github.com/Facepunch/gmod-module-base.git
+  GIT_TAG development
 )
-target_include_directories(he_core PUBLIC src)
+FetchContent_MakeAvailable(gmod-module-base)
 
-# Server module
-add_library(gmsv_hordeengine_win64 MODULE
-    src/server/module_server.cpp
-    src/core/he_core.cpp
+# --- Helper to set output dir ---
+function(he_set_out tgt)
+  get_property(MC GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+  if(MC)
+    set(_out "${CMAKE_BINARY_DIR}/out/$<CONFIG>")
+  else()
+    set(_out "${CMAKE_BINARY_DIR}/out")
+  endif()
+  set_target_properties(${tgt} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${_out}"
+    LIBRARY_OUTPUT_DIRECTORY "${_out}"
+    ARCHIVE_OUTPUT_DIRECTORY "${_out}")
+endfunction()
+
+# --- Client DLL ---
+add_library(gmcl_hordeengine_win64 SHARED
+  src/client/module_client.cpp
 )
-target_link_libraries(gmsv_hordeengine_win64 PRIVATE he_core)
-set_target_properties(gmsv_hordeengine_win64 PROPERTIES PREFIX "" SUFFIX ".dll")
-
-# Client module
-add_library(gmcl_hordeengine_win64 MODULE
-    src/client/module_client.cpp
-    src/core/he_core.cpp
+target_compile_definitions(gmcl_hordeengine_win64 PRIVATE GMOD_CLIENT)
+target_include_directories(gmcl_hordeengine_win64 PRIVATE
+  ${gmod-module-base_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-target_link_libraries(gmcl_hordeengine_win64 PRIVATE he_core)
-set_target_properties(gmcl_hordeengine_win64 PROPERTIES PREFIX "" SUFFIX ".dll")
+set_target_properties(gmcl_hordeengine_win64 PROPERTIES OUTPUT_NAME "gmcl_hordeengine_win64")
+he_set_out(gmcl_hordeengine_win64)
 
-# Output to a 'bin' folder next to the project for convenience
-set_target_properties(gmsv_hordeengine_win64 PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-set_target_properties(gmcl_hordeengine_win64 PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+# --- Server DLL ---
+add_library(gmsv_hordeengine_win64 SHARED
+  src/server/module_server.cpp
+)
+target_compile_definitions(gmsv_hordeengine_win64 PRIVATE GMOD_SERVER)
+target_include_directories(gmsv_hordeengine_win64 PRIVATE
+  ${gmod-module-base_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+set_target_properties(gmsv_hordeengine_win64 PROPERTIES OUTPUT_NAME "gmsv_hordeengine_win64")
+he_set_out(gmsv_hordeengine_win64)
