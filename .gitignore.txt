@@ -1,0 +1,53 @@
+# ==============================
+# HordeEngine .gitignore
+# For: Visual Studio + CMake + Garry's Mod Lua
+# ==============================
+
+# ---- Build output ----
+/build/
+/out/
+/bin/
+/Release/
+/Debug/
+/x64/
+/CMakeFiles/
+/CMakeCache.txt
+/CMakeSettings.json
+
+# ---- Visual Studio ----
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# ---- Compiled binaries ----
+*.dll
+*.exe
+*.pdb
+*.obj
+*.lib
+*.exp
+*.log
+
+# ---- Temporary files ----
+*.tmp
+*.cache
+*.log
+*.tlog
+*.idb
+*.ipdb
+*.iobj
+
+# ---- OS / IDE specific ----
+Thumbs.db
+.DS_Store
+*.swp
+
+# ---- Keep Lua scripts ----
+# Do NOT ignore your actual source or Lua autorun scripts
+!lua/**
+!src/**
+!scripts/**
+!CMakeLists.txt
+!.github/**
