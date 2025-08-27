@@ -3,7 +3,7 @@ name: Release HordeEngine
 on:
   push:
     tags:
-      - '*'   # Trigger on ANY tag (v1.0.0, 1.0.0, etc.)
+      - '*'   # Trigger on ANY tag (v1.0.0, 1.0.1, etc.)
 
 jobs:
   release:
@@ -33,11 +33,12 @@ jobs:
           set TAG=${{ github.ref_name }}
           powershell Compress-Archive -Path package\* -DestinationPath HordeEngine-%TAG%.zip -Force
 
-      - name: Create GitHub Release
+      - name: Create GitHub Release (with auto notes)
         uses: softprops/action-gh-release@v2
         with:
           name: Release ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
           files: HordeEngine-${{ github.ref_name }}.zip
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
