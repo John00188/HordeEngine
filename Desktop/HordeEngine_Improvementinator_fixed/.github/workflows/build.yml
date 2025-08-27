@@ -1,0 +1,29 @@
+name: Build HordeEngine
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure CMake
+        run: cmake -S . -B build -A x64 -DGMOD_MODULE_BASE_INCLUDE="C:/Users/John Sonnier/Desktop/gmod-module-base/include"
+
+      - name: Build (Release)
+        run: cmake --build build --config Release
+
+      - name: Install into GMod
+        run: |
+          set GMOD=E:/SteamLibrary/steamapps/common/GarrysMod/garrysmod
+          mkdir "%GMOD%/lua/bin" 2>nul || true
+          mkdir "%GMOD%/lua/autorun" 2>nul || true
+          copy build/bin/Release/gmcl_hordeengine_win64.dll "%GMOD%/lua/bin/"
+          copy build/bin/Release/gmsv_hordeengine_win64.dll "%GMOD%/lua/bin/"
+          copy lua/autorun/*.lua "%GMOD%/lua/autorun/"
