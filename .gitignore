@@ -1,0 +1,43 @@
+﻿# Visual Studio
+.vs/
+*.user
+*.suo
+*.sln.docstates
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+build/
+out/
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+CMakeScripts/
+Testing/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+
+# Logs & intermediates
+*.log
+*.tlog
+*.pdb
+*.idb
+*.ipdb
+*.iobj
+*.obj
+*.lib
+*.exp
+
+# OS junk
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Local artifacts
+*.zip
+CRASHREPORT.txt
