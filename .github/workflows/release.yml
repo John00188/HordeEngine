@@ -1,0 +1,43 @@
+name: Release HordeEngine
+
+on:
+  push:
+    tags:
+      - '*'   # Trigger on ANY tag (v1.0.0, 1.0.0, etc.)
+
+jobs:
+  release:
+    runs-on: self-hosted   # Uses your Windows self-hosted runner
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure CMake
+        run: cmake -S . -B build -A x64 -DGMOD_MODULE_BASE_INCLUDE="C:/Users/John Sonnier/Desktop/gmod-module-base/include"
+
+      - name: Build (Release)
+        run: cmake --build build --config Release
+
+      - name: Package HordeEngine (DLLs + Lua + README + Scripts)
+        run: |
+          set PKG=package
+          mkdir %PKG%
+          copy build/bin/Release/gmcl_hordeengine_win64.dll %PKG%\
+          copy build/bin/Release/gmsv_hordeengine_win64.dll %PKG%\
+          copy lua/autorun/*.lua %PKG%\
+          copy README.md %PKG%\
+          xcopy scripts %PKG%\scripts\ /E /I
+
+      - name: Create zip archive
+        run: |
+          set TAG=${{ github.ref_name }}
+          powershell Compress-Archive -Path package\* -DestinationPath HordeEngine-%TAG%.zip -Force
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          files: HordeEngine-${{ github.ref_name }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
