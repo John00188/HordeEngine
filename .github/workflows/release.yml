@@ -1,50 +1,19 @@
-name: Build HordeEngine
+name: Release HordeEngine
 
 on:
   push:
-    branches: [ main ]
-    paths:
-      - '**/*.cpp'
-      - '**/*.hpp'
-      - 'CMakeLists.txt'
-      - 'lua/**'
-      - 'scripts/**'
-      - '.github/workflows/build.yml'
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch: {}
+    tags: [ '*' ]   # any tag triggers a release
 
 permissions:
-  contents: read
+  contents: write   # needed to publish the release
 
 concurrency:
-  group: build-${{ github.ref }}
-  cancel-in-progress: true
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  check-ignore:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Enforce .gitignore hygiene
-        run: |
-          echo "Checking for tracked binaries/VS cruft…"
-          git ls-files | grep -E '\.(dll|exe|pdb|obj|lib|exp|vcxproj(\.filters|\.user)?|sln)$' \
-            && { echo "❌ Remove binaries/VS files from Git"; exit 1; } \
-            || echo "✅ Clean"
-
-  commitlint:
-    runs-on: ubuntu-latest
-    needs: check-ignore
-    if: github.event_name == 'pull_request' || github.event_name == 'push'
-    steps:
-      - uses: actions/checkout@v3
-        with: { fetch-depth: 0 }
-      - uses: wagoid/commitlint-github-action@v6
-
-  build:
+  release:
     runs-on: self-hosted
-    needs: [check-ignore, commitlint]
 
     steps:
       - uses: actions/checkout@v3
@@ -54,16 +23,6 @@ jobs:
 
       - name: Build
         run: cmake --build build --config Release
-
-      - name: Install into local GMod
-        shell: cmd
-        run: |
-          set GMOD=E:\SteamLibrary\steamapps\common\GarrysMod\garrysmod
-          if not exist "%GMOD%\lua\bin" mkdir "%GMOD%\lua\bin"
-          if not exist "%GMOD%\lua\autorun" mkdir "%GMOD%\lua\autorun"
-          copy /Y build\bin\Release\gmcl_hordeengine_win64.dll "%GMOD%\lua\bin\"
-          copy /Y build\bin\Release\gmsv_hordeengine_win64.dll "%GMOD%\lua\bin\"
-          copy /Y lua\autorun\*.lua "%GMOD%\lua\autorun\"
 
       - name: Package (DLLs + Lua + README + scripts)
         shell: cmd
@@ -76,12 +35,17 @@ jobs:
           copy /Y README.md package\
           xcopy scripts package\scripts\ /E /I /Y
 
-      - name: Zip artifact
-        run: powershell -NoProfile -Command "Compress-Archive -Path package\* -DestinationPath HordeEngine-latest.zip -Force"
+      - name: Create versioned zip
+        run: |
+          $tag='${{ github.ref_name }}'
+          Compress-Archive -Path package\* -DestinationPath "HordeEngine-$tag.zip" -Force
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Publish GitHub Release (auto notes)
+        uses: softprops/action-gh-release@v2
         with:
-          name: HordeEngine-latest
-          path: HordeEngine-latest.zip
-          retention-days: 7
+          name: "Release ${{ github.ref_name }}"
+          tag_name: ${{ github.ref_name }}
+          files: "HordeEngine-${{ github.ref_name }}.zip"
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
