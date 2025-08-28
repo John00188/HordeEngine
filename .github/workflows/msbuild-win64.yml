@@ -1,0 +1,70 @@
+﻿name: MSBuild Windows x64
+on:
+  push:
+    branches: [ main ]
+    tags: [ v* ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
+
+      - name: Discover projects
+        shell: pwsh
+        run: |
+          $client = Get-ChildItem -Recurse -Filter 'gmcl_hordeengine_win64.vcxproj' | Select-Object -First 1 -ExpandProperty FullName
+          $server = Get-ChildItem -Recurse -Filter 'gmsv_hordeengine_win64.vcxproj' | Select-Object -First 1 -ExpandProperty FullName
+          if ($client) { "CLIENT=$client" | Out-File -Append -FilePath $env:GITHUB_ENV; "HAS_CLIENT=true" | Out-File -Append -FilePath $env:GITHUB_ENV } else { "HAS_CLIENT=false" | Out-File -Append -FilePath $env:GITHUB_ENV }
+          if ($server) { "SERVER=$server" | Out-File -Append -FilePath $env:GITHUB_ENV; "HAS_SERVER=true" | Out-File -Append -FilePath $env:GITHUB_ENV } else { "HAS_SERVER=false" | Out-File -Append -FilePath $env:GITHUB_ENV }
+          if (-not $client -and -not $server) { throw 'No .vcxproj files found.' }
+
+      - name: Build Client (Release x64)
+        if: env.HAS_CLIENT == 'true'
+        shell: pwsh
+        run: msbuild "$env:CLIENT" /m /p:Configuration=Release /p:Platform=x64 /p:PreferredToolArchitecture=x64
+
+      - name: Build Server (Release x64)
+        if: env.HAS_SERVER == 'true'
+        shell: pwsh
+        run: msbuild "$env:SERVER" /m /p:Configuration=Release /p:Platform=x64 /p:PreferredToolArchitecture=x64
+
+      - name: Verify x64 (dumpbin)
+        shell: pwsh
+        run: |
+          $dumpbin = (Get-Command dumpbin).Source
+          $dlls = @()
+          $c = Get-ChildItem -Recurse -Filter 'gmcl_hordeengine_win64.dll' | Select-Object -First 1
+          $s = Get-ChildItem -Recurse -Filter 'gmsv_hordeengine_win64.dll' | Select-Object -First 1
+          if ($c) { $dlls += $c }
+          if ($s) { $dlls += $s }
+          foreach ($f in $dlls) {
+            $line = & $dumpbin /headers $f.FullName | Select-String -Pattern 'machine'
+            Write-Host $line
+            if ($line -notmatch 'x64' -and $line -notmatch '8664') { throw "$($f.FullName) is not x64" }
+          }
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: hordeengine-Release-win64
+          path: |
+            **\Release\gmcl_hordeengine_win64.dll
+            **\Release\gmsv_hordeengine_win64.dll
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: windows-latest
+    needs: build
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: hordeengine-Release-win64
+          path: dist
+      - uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: dist\*.dll

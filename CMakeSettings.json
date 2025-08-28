@@ -1,22 +1,14 @@
 ﻿{
+  "toolset": { "value": "v143" },
   "configurations": [
     {
-      "name": "GMOD_MODULE_BASE_INCLUDE",
-      "generator": "Ninja",
-      "configurationType": "Release",
+      "name": "vs2022-Debug",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "binaryDir": "${projectDir}\\build\\vs2022",
+      "installRoot": "${projectDir}\\install\\vs2022",
       "inheritEnvironments": [ "msvc_x64_x64" ],
-      "buildRoot": "${projectDir}\\out\\build\\${name}",
-      "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "variables": [
-        {
-          "name": "CMAKE_MAKE_PROGRAM",
-          "value": "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe",
-          "type": "FILEPATH"
-        }
-      ]
+      "cmakeCommandArgs": ""
     }
   ]
 }
