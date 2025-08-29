@@ -1,12 +1,12 @@
 ﻿{
     "version":  1,
-    "updated_at":  "2025-08-29T23:23:03Z",
+    "updated_at":  "2025-08-29T23:56:40Z",
     "agents":  {
                    "operator":  {
                                     "name":  "AgentMode",
-                                    "heartbeat":  "2025-08-29T23:23:03Z",
+                                    "heartbeat":  "2025-08-29T23:56:40Z",
                                     "status":  "working",
-                                    "last_note":  "Claim plan-issue"
+                                    "last_note":  "Recorded real URLs"
                                 },
                    "codex":  {
                                  "name":  "Codex",
@@ -26,7 +26,8 @@
 
                                          ],
                            "notes":  [
-                                         "2025-08-29T23:23:03Z AgentMode: starting planning issue"
+                                         "2025-08-29T23:23:03Z AgentMode: starting planning issue",
+                                         "2025-08-29T23:56:40Z planning issue: https://github.com/John00188/HordeEngine/issues/\u003cnum\u003e"
                                      ]
                        },
                        {
@@ -34,7 +35,7 @@
                            "title":  "Add tools/build/build_vs2022.ps1 with export checks",
                            "owner":  null,
                            "state":  "queued",
-                           "pr":  null,
+                           "pr":  "https://github.com/John00188/HordeEngine/pull/\u003cnum\u003e",
                            "artifacts":  [
 
                                          ],
@@ -47,7 +48,7 @@
                            "title":  "Add tools/dev/sync_to_gmod.ps1 and backup flow",
                            "owner":  null,
                            "state":  "queued",
-                           "pr":  null,
+                           "pr":  "https://github.com/John00188/HordeEngine/pull/\u003cnum\u003e",
                            "artifacts":  [
 
                                          ],
@@ -60,7 +61,7 @@
                            "title":  "Add .github/workflows/win-build.yml (artifacts uploaded)",
                            "owner":  null,
                            "state":  "queued",
-                           "pr":  null,
+                           "pr":  "https://github.com/John00188/HordeEngine/pull/\u003cnum\u003e",
                            "artifacts":  [
 
                                          ],
