@@ -1,23 +1,28 @@
-﻿#include <GarrysMod/Lua/Interface.h>
-#include <windows.h>
+﻿#include "GarrysMod/Lua/Interface.h"
+
 using namespace GarrysMod::Lua;
 
-// ❶ Force exports via linker flags (belt-and-suspenders)
-#pragma comment(linker, "/EXPORT:gmod13_open")
-#pragma comment(linker, "/EXPORT:gmod13_close")
+// Define a Lua-callable function
+LUA_FUNCTION(he_Test)
+{
+    LUA->PushString("Hello from HordeEngine!");
+    return 1; // returning 1 means 1 value is left on the Lua stack
+}
 
-extern "C" {   // ❷ Remove C++ name mangling
+GMOD_MODULE_OPEN()
+{
+    // Create a table for the module
+    LUA->CreateTable();
 
-    // ❸ __declspec(dllexport) in case DEF/pragma are ignored
-    __declspec(dllexport) int gmod13_open(ILuaBase* LUA) {
-        OutputDebugStringA("[HE/CLIENT] gmod13_open\n");
-        LUA->CreateTable();
-        return 1;
-    }
+    // Add the he_Test function to it
+    LUA->PushCFunction(he_Test);
+    LUA->SetField(-2, "test");
 
-    __declspec(dllexport) int gmod13_close(ILuaBase* /*LUA*/) {
-        OutputDebugStringA("[HE/CLIENT] gmod13_close\n");
-        return 0;
-    }
+    // This table is returned to Lua as the value of require("hordeengine")
+    return 1;
+}
 
-} // extern "C"
+GMOD_MODULE_CLOSE()
+{
+    return 0;
+}

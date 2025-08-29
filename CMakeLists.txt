@@ -1,54 +1,52 @@
-cmake_minimum_required(VERSION 3.20)
-project(HordeEngine LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.16)
+project(hordeengine LANGUAGES CXX)
 
-# --- Language standard ---
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
-# --- Fetch Facepunch gmod-module-base headers ---
-include(FetchContent)
-FetchContent_Declare(
-  gmod-module-base
-  GIT_REPOSITORY https://github.com/Facepunch/gmod-module-base.git
-  GIT_TAG development
-)
-FetchContent_MakeAvailable(gmod-module-base)
+# Force x64
+if (NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+    message(FATAL_ERROR "HordeEngine must be built as x64, not Win32.")
+endif()
 
-# --- Helper to set output dir ---
-function(he_set_out tgt)
-  get_property(MC GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-  if(MC)
-    set(_out "${CMAKE_BINARY_DIR}/out/$<CONFIG>")
-  else()
-    set(_out "${CMAKE_BINARY_DIR}/out")
-  endif()
-  set_target_properties(${tgt} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${_out}"
-    LIBRARY_OUTPUT_DIRECTORY "${_out}"
-    ARCHIVE_OUTPUT_DIRECTORY "${_out}")
-endfunction()
+# Where DLLs go in your local GMod install
+set(GMOD_LUABIN "E:/SteamLibrary/steamapps/common/GarrysMod/garrysmod/lua/bin")
 
-# --- Client DLL ---
-add_library(gmcl_hordeengine_win64 SHARED
-  src/client/module_client.cpp
+# Add sources
+set(SOURCES
+    src/hordeengine_server.cpp
+    src/minimal_only.cpp
 )
-target_compile_definitions(gmcl_hordeengine_win64 PRIVATE GMOD_CLIENT)
-target_include_directories(gmcl_hordeengine_win64 PRIVATE
-  ${gmod-module-base_SOURCE_DIR}/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
-set_target_properties(gmcl_hordeengine_win64 PROPERTIES OUTPUT_NAME "gmcl_hordeengine_win64")
-he_set_out(gmcl_hordeengine_win64)
 
-# --- Server DLL ---
-add_library(gmsv_hordeengine_win64 SHARED
-  src/server/module_server.cpp
-)
-target_compile_definitions(gmsv_hordeengine_win64 PRIVATE GMOD_SERVER)
-target_include_directories(gmsv_hordeengine_win64 PRIVATE
-  ${gmod-module-base_SOURCE_DIR}/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
-set_target_properties(gmsv_hordeengine_win64 PROPERTIES OUTPUT_NAME "gmsv_hordeengine_win64")
-he_set_out(gmsv_hordeengine_win64)
+# Build both server + client DLLs
+add_library(gmsv_hordeengine_win64 SHARED ${SOURCES})
+add_library(gmcl_hordeengine_win64 SHARED ${SOURCES})
+
+# Include paths
+target_include_directories(gmsv_hordeengine_win64 PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(gmcl_hordeengine_win64 PRIVATE ${CMAKE_SOURCE_DIR}/include)
+
+# ========================
+# Post-Build Copy (LOCAL)
+# ========================
+if(NOT DEFINED ENV{GITHUB_ACTIONS})
+    message(STATUS "Local build detected — enabling copy to Garry's Mod.")
+
+    # Copy server DLL
+    add_custom_command(TARGET gmsv_hordeengine_win64 POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${GMOD_LUABIN}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:gmsv_hordeengine_win64>
+            "${GMOD_LUABIN}/"
+    )
+
+    # Copy client DLL
+    add_custom_command(TARGET gmcl_hordeengine_win64 POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${GMOD_LUABIN}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:gmcl_hordeengine_win64>
+            "${GMOD_LUABIN}/"
+    )
+else()
+    message(STATUS "CI build detected — skipping copy to Garry's Mod.")
+endif()
