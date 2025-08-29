@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ops/comms.json schema",
+  "type": "object",
+  "required": [
+    "version",
+    "updated_at",
+    "agents",
+    "work_items"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer"
+    },
+    "updated_at": {
+      "type": "string"
+    },
+    "agents": {
+      "type": "object",
+      "properties": {
+        "operator": {
+          "type": "object"
+        },
+        "codex": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": true
+    },
+    "work_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "state",
+          "owner",
+          "pr",
+          "artifacts",
+          "notes"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "owner": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "state": {
+            "type": "string"
+          },
+          "pr": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}
