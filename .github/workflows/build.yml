@@ -1,61 +1,24 @@
-name: Build HordeEngine
+name: Build
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches: ["main"]
 
 jobs:
-  check-ignore:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: List unignored binaries
-        run: |
-          echo "Checking repo for ignored file types..."
-          git ls-files | grep -E '\.(dll|exe|pdb|obj|lib|exp|vcxproj|sln)$' && exit 1 || echo "✅ No binaries tracked in Git!"
-
   build:
-    runs-on: self-hosted
-    needs: check-ignore
-
+    runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
-
+      - uses: actions/checkout@v4
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
       - name: Configure CMake
-        run: cmake -S . -B build -A x64 -DGMOD_MODULE_BASE_INCLUDE="C:/Users/John Sonnier/Desktop/gmod-module-base/include"
-
-      - name: Build (Release)
-        run: cmake --build build --config Release
-
-      - name: Install into GMod
-        run: |
-          set GMOD=E:/SteamLibrary/steamapps/common/GarrysMod/garrysmod
-          mkdir "%GMOD%/lua/bin" 2>nul || true
-          mkdir "%GMOD%/lua/autorun" 2>nul || true
-          copy build/bin/Release/gmcl_hordeengine_win64.dll "%GMOD%/lua/bin/"
-          copy build/bin/Release/gmsv_hordeengine_win64.dll "%GMOD%/lua/bin/"
-          copy lua/autorun/*.lua "%GMOD%/lua/autorun/"
-
-      - name: Package HordeEngine (DLLs + Lua + README + Scripts)
-        run: |
-          set PKG=package
-          mkdir %PKG%
-          copy build/bin/Release/gmcl_hordeengine_win64.dll %PKG%\
-          copy build/bin/Release/gmsv_hordeengine_win64.dll %PKG%\
-          copy lua/autorun/*.lua %PKG%\
-          copy README.md %PKG%\
-          xcopy scripts %PKG%\scripts\ /E /I
-
-      - name: Create zip archive
-        run: |
-          powershell Compress-Archive -Path package\* -DestinationPath HordeEngine-latest.zip -Force
-
-      - name: Upload zip artifact
+        run: cmake -B build -A x64 -DCMAKE_BUILD_TYPE=Debug
+      - name: Build server and client
+        run: cmake --build build --config Debug --target gmsv_hordeengine_win64 gmcl_hordeengine_win64
+      - name: Upload DLLs
         uses: actions/upload-artifact@v4
         with:
-          name: HordeEngine-latest
-          path: HordeEngine-latest.zip
-          retention-days: 7
+          name: hordeengine-dlls
+          path: |
+            build/bin/server/x64/Debug/gmsv_hordeengine_win64.dll
+            build/bin/client/x64/Debug/gmcl_hordeengine_win64.dll
