@@ -1,80 +1,51 @@
 # HordeEngine
 
-An experimental back-end engine for Garry’s Mod that aims to add large — frankly absurd — quantities of zombies into the game with minimal performance impact.
+[![Build Status](https://github.com/John00188/HordeEngine/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/John00188/HordeEngine/actions/workflows/build.yml)
+[![Latest Release](https://img.shields.io/github/v/release/John00188/HordeEngine?include_prereleases&sort=semver)](https://github.com/John00188/HordeEngine/releases)
 
----
+A performance-oriented backend module for Garry's Mod.
 
-## Features
-- Minimal test module with `hordeengine.status2()` function for quick load checks.
-- Supports both client (`gmcl_hordeengine_win64.dll`) and server (`gmsv_hordeengine_win64.dll`) builds.
-- Designed to push GMod performance limits while staying lightweight.
 
----
+# HordeEngine Improvementinator 3000 (Usable Skeleton)
 
-## Build Instructions
-1. Open the project in **Visual Studio 2022**.
-2. Build either `gmcl_hordeengine_win64` or `gmsv_hordeengine_win64` in **Release x64**.
-3. Copy the DLLs into:
-garrysmod/lua/bin/
+This is a **clean, buildable** backend module for Garry's Mod that exposes `he.*` functions from native C++ to Lua.
 
-yaml
-Copy
-Edit
-Or run the included **PowerShell deploy script** to automatically handle backups and deployment.
+## What you get
+- **C++17 native module** (client + server): `gmcl_hordeengine_win64.dll`, `gmsv_hordeengine_win64.dll`
+- **Lua loader & helpers**: `he_status`, `he_bench`, `he_status_cl`, `he_bench_cl`
+- **Safe pools glue** that won't overwrite your existing PerfCore `pf.NPCPools`
 
----
+## Build
+1. Make sure you have **Visual Studio 2022** with C++ and **CMake 3.20+**.
+2. Ensure Facepunch headers are available at:
+   `dev/gmod-module-base/include` relative to this project.
+   - If not, set `-DGMOD_MODULE_BASE_INCLUDE="C:/path/to/gmod-module-base/include"`
 
-## Debug / Testing
-Inside Garry’s Mod console:
-```lua
-lua_run print(pcall(require, "hordeengine"))
-lua_run print(hordeengine.status2())
-Expected output:
+```powershell
+# from the project root
+.\scripts\build.ps1
+```
 
-arduino
-Copy
-Edit
-true
-HordeEngine_OK
-Development Workflow
-Git Workflow
-This repo includes helper scripts for quick syncing with GitHub:
+Artifacts appear in `build/bin/Release`.
 
-push.bat
-Stages all changes, commits, and pushes to GitHub.
-Usage: double-click push.bat, enter a commit message if prompted, and it’s done.
+## Install
+Set your GMod path (edit inside `install.ps1` or pass param) and run:
 
-pull.bat
-Fetches and rebases the latest changes from GitHub onto your local branch.
-Usage: double-click pull.bat before starting new work to stay up to date.
+```powershell
+.\scripts\install.ps1 -GMod "E:\SteamLibrary\steamapps\common\GarrysMod\garrysmod"
+```
 
-Notes
-Repo marked as a safe directory, so no “dubious ownership” warnings.
+## Use In-Game
+Open console:
 
-Authentication handled via GitHub Personal Access Token (PAT) stored in Windows Credential Manager.
+```
+// Server-side (works in singleplayer too)
+he_status
+he_bench 1000000
 
-Line endings normalized via .gitattributes for cross-platform consistency.
+// Client-side helpers
+he_status_cl
+he_bench_cl 400000
+```
 
-Roadmap
-Expand from minimal API → full zombie-spawn backend.
-
-Optimize entity updates for massive hordes.
-
-Add modular extensions for AI behaviors.
-
-License
-MIT License — free to use, modify, and distribute.
-
-yaml
-Copy
-Edit
-
----
-
-✅ That gives you:  
-- Project description  
-- Build steps  
-- In-game test commands  
-- Git workflow docs (`push.bat` / `pull.bat`)  
-- Roadmap + License  
-
+If you also keep **PerfCore**, the file `he_pools.lua` ensures `pf.SpawnFromPool` exists without overwriting your existing pools.

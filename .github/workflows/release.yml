@@ -2,10 +2,10 @@ name: Release HordeEngine
 
 on:
   push:
-    tags: [ '*' ]   # any tag triggers a release
+    tags: [ '*' ]   # trigger on ANY tag, e.g. v1.0.0
 
 permissions:
-  contents: write   # needed to publish the release
+  contents: write
 
 concurrency:
   group: release-${{ github.ref }}
@@ -24,10 +24,10 @@ jobs:
       - name: Build
         run: cmake --build build --config Release
 
-      - name: Package (DLLs + Lua + README + scripts)
+      - name: Collect package contents (DLLs + Lua + README + scripts)
         shell: cmd
         run: |
-          if exist package rmdir /S /Q package
+          if exist package rmdir /s /q package
           mkdir package
           copy /Y build\bin\Release\gmcl_hordeengine_win64.dll package\
           copy /Y build\bin\Release\gmsv_hordeengine_win64.dll package\
@@ -35,17 +35,20 @@ jobs:
           copy /Y README.md package\
           xcopy scripts package\scripts\ /E /I /Y
 
-      - name: Create versioned zip
+      - name: Create zips (versioned + latest)
         run: |
           $tag='${{ github.ref_name }}'
-          Compress-Archive -Path package\* -DestinationPath "HordeEngine-$tag.zip" -Force
+          Compress-Archive -Path package\* -DestinationPath ("HordeEngine-" + $tag + ".zip") -Force
+          Compress-Archive -Path package\* -DestinationPath "HordeEngine-latest.zip" -Force
 
-      - name: Publish GitHub Release (auto notes)
+      - name: Publish GitHub Release (auto notes, attach both zips)
         uses: softprops/action-gh-release@v2
         with:
           name: "Release ${{ github.ref_name }}"
           tag_name: ${{ github.ref_name }}
-          files: "HordeEngine-${{ github.ref_name }}.zip"
+          files: |
+            HordeEngine-${{ github.ref_name }}.zip
+            HordeEngine-latest.zip
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
