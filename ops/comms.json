@@ -1,83 +1,124 @@
-{
-  "version": 1,
-  "updated_at": "2025-08-29T22:52:43Z",
-  "agents": {
-    "operator": {
-      "name": "AgentMode",
-      "heartbeat": null,
-      "status": "idle",
-      "last_note": ""
-    },
-    "codex": {
-      "name": "Codex",
-      "heartbeat": null,
-      "status": "idle",
-      "last_note": ""
-    }
-  },
-  "work_items": [
-    {
-      "id": "plan-issue",
-      "title": "Open planning issue + checklist",
-      "owner": null,
-      "state": "queued",
-      "pr": null,
-      "artifacts": [],
-      "notes": []
-    },
-    {
-      "id": "build-script",
-      "title": "Add tools/build/build_vs2022.ps1 with export checks",
-      "owner": null,
-      "state": "queued",
-      "pr": null,
-      "artifacts": [],
-      "notes": []
-    },
-    {
-      "id": "sync-script",
-      "title": "Add tools/dev/sync_to_gmod.ps1 and backup flow",
-      "owner": null,
-      "state": "queued",
-      "pr": null,
-      "artifacts": [],
-      "notes": []
-    },
-    {
-      "id": "ci-workflow",
-      "title": "Add .github/workflows/win-build.yml (artifacts uploaded)",
-      "owner": null,
-      "state": "queued",
-      "pr": null,
-      "artifacts": [],
-      "notes": []
-    },
-    {
-      "id": "release-workflow",
-      "title": "Add .github/workflows/win-release.yml (tagged release + checksums)",
-      "owner": null,
-      "state": "queued",
-      "pr": null,
-      "artifacts": [],
-      "notes": []
-    },
-    {
-      "id": "docs",
-      "title": "Update README Quickstart + add CONTRIBUTING + CHANGELOG",
-      "owner": null,
-      "state": "queued",
-      "pr": null,
-      "artifacts": [],
-      "notes": []
-    },
-    {
-      "id": "version-bump",
-      "title": "Tag next version and publish release",
-      "owner": null,
-      "state": "queued",
-      "pr": null,
-      "artifacts": [],
-      "notes": []
-    }
-  ]
+﻿{
+    "version":  1,
+    "updated_at":  "2025-08-30T02:25:44Z",
+    "agents":  {
+                   "operator":  {
+                                    "name":  "AgentMode",
+                                    "heartbeat":  null,
+                                    "status":  "idle",
+                                    "last_note":  ""
+                                },
+                   "codex":  {
+                                 "name":  "Codex",
+                                 "heartbeat":  null,
+                                 "status":  "idle",
+                                 "last_note":  ""
+                             }
+               },
+    "work_items":  [
+                       {
+                           "id":  "plan-issue",
+                           "title":  "Open planning issue + checklist",
+                           "owner":  null,
+                           "state":  "queued",
+                           "pr":  null,
+                           "artifacts":  [
+
+                                         ],
+                           "notes":  [
+
+                                     ]
+                       },
+                       {
+                           "id":  "build-script",
+                           "title":  "Add tools/build/build_vs2022.ps1 with export checks",
+                           "owner":  null,
+                           "state":  "queued",
+                           "pr":  null,
+                           "artifacts":  [
+
+                                         ],
+                           "notes":  [
+
+                                     ]
+                       },
+                       {
+                           "id":  "sync-script",
+                           "title":  "Add tools/dev/sync_to_gmod.ps1 and backup flow",
+                           "owner":  null,
+                           "state":  "queued",
+                           "pr":  null,
+                           "artifacts":  [
+
+                                         ],
+                           "notes":  [
+
+                                     ]
+                       },
+                       {
+                           "id":  "ci-workflow",
+                           "title":  "Add .github/workflows/win-build.yml (artifacts uploaded)",
+                           "owner":  null,
+                           "state":  "queued",
+                           "pr":  null,
+                           "artifacts":  [
+
+                                         ],
+                           "notes":  [
+
+                                     ]
+                       },
+                       {
+                           "id":  "release-workflow",
+                           "title":  "Add .github/workflows/win-release.yml (tagged release + checksums)",
+                           "owner":  null,
+                           "state":  "queued",
+                           "pr":  null,
+                           "artifacts":  [
+
+                                         ],
+                           "notes":  [
+
+                                     ]
+                       },
+                       {
+                           "id":  "docs",
+                           "title":  "Update README Quickstart + add CONTRIBUTING + CHANGELOG",
+                           "owner":  null,
+                           "state":  "queued",
+                           "pr":  null,
+                           "artifacts":  [
+
+                                         ],
+                           "notes":  [
+
+                                     ]
+                       },
+                       {
+                           "id":  "version-bump",
+                           "title":  "Tag next version and publish release",
+                           "owner":  null,
+                           "state":  "queued",
+                           "pr":  null,
+                           "artifacts":  [
+
+                                         ],
+                           "notes":  [
+
+                                     ]
+                       },
+                       {
+                           "id":  "ops-flyover",
+                           "title":  "Add dispatch-only flyover workflow",
+                           "owner":  null,
+                           "state":  "review",
+                           "pr":  "https://github.com/John00188/HordeEngine/pull/\u003cnumber\u003e",
+                           "artifacts":  [
+
+                                         ],
+                           "notes":  [
+
+                                     ]
+                       }
+                   ]
 }

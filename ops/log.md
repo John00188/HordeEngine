@@ -5,3 +5,4 @@
 2025-08-30T01:20:50Z FLYOVER • order • docs • claim
 2025-08-30T01:20:50Z FLYOVER • order • docs • focus: add README badges + Quickstart; add CONTRIBUTING.md; append CHANGELOG v0.2.5
 2025-08-30T01:20:50Z FLYOVER • order • docs • pr: title='docs: badges, Quickstart, CONTRIBUTING, CHANGELOG v0.2.5' body='Badges + Quickstart + contributing and changelog.'
+2025-08-30T02:25:44Z • Codex • ops-flyover • PR opened https://github.com/John00188/HordeEngine/pull/<number>
