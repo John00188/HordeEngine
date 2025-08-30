@@ -1,0 +1,19 @@
+﻿name: ops-flyover
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: ops-flyover
+  cancel-in-progress: false
+
+jobs:
+  flyover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+      - name: Hello (placeholder)
+        run: echo "ops-flyover wired up"
