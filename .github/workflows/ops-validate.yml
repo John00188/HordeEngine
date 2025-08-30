@@ -1,0 +1,15 @@
+﻿name: ops-validate
+on:
+  pull_request:
+    paths: [ "ops/comms.json" ]
+  push:
+    paths: [ "ops/comms.json" ]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: validate
+        run: python - <<'PY'
+import json; json.load(open('ops/comms.json'))
+PY
