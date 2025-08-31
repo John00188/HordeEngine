@@ -1,0 +1,20 @@
+﻿name: perfmesh-artifacts
+on:
+  push:
+    branches: [ 'codex/perfmesh-v2' ]
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pack PerfMesh v2
+        run: |
+          powershell -Command "Compress-Archive -Path 'experiments/perfmesh_v2/addon/*' -DestinationPath 'artifacts/perfmesh_v2.zip'"
+      - name: Pack PerfMesh Bridges
+        run: |
+          powershell -Command "Compress-Archive -Path 'experiments/perfmesh_bridges/addon/*' -DestinationPath 'artifacts/perfmesh_bridges.zip'"
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: perfmesh_zips
+          path: artifacts/*.zip
