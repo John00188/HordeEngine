@@ -3,7 +3,6 @@ if not SERVER then return end
 local PM = _G.PerfMesh; if not PM then return end
 local TAG = "[PM-Policy]"
 
--- Policy cvars
 local cv_enable_policies = CreateConVar("pm_policies", "1", FCVAR_ARCHIVE, "Enable PerfMesh policies")
 local cv_ragdoll_max     = CreateConVar("pm_ragdoll_max", "25", FCVAR_ARCHIVE, "Max ragdolls before trim")
 local cv_no_shadows      = CreateConVar("pm_npc_no_shadows", "1", FCVAR_ARCHIVE, "Disable NPC shadows on spawn")
@@ -16,11 +15,9 @@ local cv_aggr_level      = CreateConVar("pm_aggressiveness", "1", FCVAR_ARCHIVE,
 
 local managed, ragdolls = {}, {}
 local managed_idx = 1
-
 local function is_npc(ent) return IsValid(ent) and (ent:IsNPC() or (ent.IsNextBot and ent:IsNextBot())) end
 local function dbg(...) if GetConVar("pm_debug"):GetBool() then print(TAG, ...) end end
 
--- Track ragdolls + trim
 hook.Add("OnEntityCreated","PM_RagdollTrack", function(ent)
     if not cv_enable_policies:GetBool() then return end
     if not IsValid(ent) then return end
@@ -31,9 +28,7 @@ hook.Add("OnEntityCreated","PM_RagdollTrack", function(ent)
             local max = math.max(0, cv_ragdoll_max:GetInt())
             if max>0 and #ragdolls>max then
                 local trim = #ragdolls - max
-                for i=1,trim do
-                    local r = ragdolls[i]; if IsValid(r) then r:Remove() end
-                end
+                for i=1,trim do local r = ragdolls[i]; if IsValid(r) then r:Remove() end end
                 local new = {}
                 for i=trim+1,#ragdolls do if IsValid(ragdolls[i]) then new[#new+1]=ragdolls[i] end end
                 ragdolls = new
@@ -43,7 +38,6 @@ hook.Add("OnEntityCreated","PM_RagdollTrack", function(ent)
     end)
 end)
 
--- Track NPCs + spawn tweaks
 hook.Add("OnEntityCreated","PM_NPCTrack", function(ent)
     if not cv_enable_policies:GetBool() then return end
     if not IsValid(ent) then return end
@@ -56,7 +50,6 @@ hook.Add("OnEntityCreated","PM_NPCTrack", function(ent)
     end)
 end)
 
--- Helpers
 local function nearest_player_info(ent)
     local best, oof = math.huge, true
     local pos = ent:GetPos()
@@ -73,12 +66,9 @@ local function nearest_player_info(ent)
     return math.sqrt(best), oof
 end
 
--- Round-robin NPC pacing under PerfMesh scheduler
 PM.JobRegister("pm.policies.npc_scan", function()
-    -- purge invalids
     for i=#managed,1,-1 do if not IsValid(managed[i]) then table.remove(managed,i) end end
-    PM.MetricSet("npc.tracked", #managed)
-    PM.MetricSet("ragdolls.count", #ragdolls)
+    PM.MetricSet("npc.tracked", #managed); PM.MetricSet("ragdolls.count", #ragdolls)
     if #managed==0 then return end
 
     local farDist = cv_far_distance:GetFloat()
@@ -88,14 +78,13 @@ PM.JobRegister("pm.policies.npc_scan", function()
 
     local start = SysTime()
     local processed = 0
-    while (SysTime()-start)*1000.0 < 0.75 do -- micro-slice inside our job
+    while (SysTime()-start)*1000.0 < 0.75 do
         if managed_idx > #managed then managed_idx = 1 end
         local ent = managed[managed_idx]; managed_idx = managed_idx + 1
         if IsValid(ent) then
             local dist, oof = nearest_player_info(ent)
             local farish = dist > farDist
             local slow   = farish and (not use_fov or oof)
-
             if slow then
                 pcall(function()
                     if ent.SetMaxLookDistance then ent:SetMaxLookDistance(math.max(500, farDist*0.6)) end
@@ -111,7 +100,6 @@ PM.JobRegister("pm.policies.npc_scan", function()
     end
 end, {hz=10, prio=10, slice_ms=0.9})
 
--- Adaptive manager: reacts to scheduler pressure
 PM.JobRegister("pm.policies.adaptive", function()
     if not cv_adaptive:GetBool() then return end
     local used = PM.metrics.ema["sched.used_ms"] or 0
@@ -120,15 +108,13 @@ PM.JobRegister("pm.policies.adaptive", function()
     PM.MetricSet("sched.headroom_ms", headroom)
 
     local aggr = math.Clamp(cv_aggr_level:GetInt(),0,3)
-    local step = (headroom < 0.2) and 1 or (headroom < 0.6 and 0 or -1) -- tighten if <0.2ms headroom, loosen if plenty
+    local step = (headroom < 0.2) and 1 or (headroom < 0.6 and 0 or -1)
     if step ~= 0 then
-        -- Adjust ragdolls
         local r = cv_ragdoll_max:GetInt()
         local delta = (step>0) and (-2-aggr) or (1+aggr)
         local nr = math.max(5, r + delta)
         if nr ~= r then RunConsoleCommand("pm_ragdoll_max", tostring(nr)) end
 
-        -- Adjust far distance & hz_far
         local fd = cv_far_distance:GetFloat()
         local nfd = math.max(1200, fd + (step>0 and 200 or -150))
         if math.abs(nfd-fd) >= 1 then RunConsoleCommand("pm_far_distance", tostring(math.floor(nfd))) end
@@ -139,7 +125,6 @@ PM.JobRegister("pm.policies.adaptive", function()
     end
 end, {hz=2, prio=20, slice_ms=0.3})
 
--- Console helpers
 concommand.Add("pm_policy_status", function(ply)
     if IsValid(ply) and not ply:IsAdmin() then return end
     print(TAG, "policies=", cv_enable_policies:GetBool(),

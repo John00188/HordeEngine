@@ -7,15 +7,14 @@ PM.__v   = "0.2.0"
 PM.__tag = "[PerfMesh]"
 PM.debug = false
 
--- ConVars
-local cv_enabled      = CreateConVar("pm_enabled", "1", FCVAR_ARCHIVE, "Enable PerfMesh")
-local cv_debug        = CreateConVar("pm_debug", "0", FCVAR_ARCHIVE, "Debug logs")
-local cv_budget_ms    = CreateConVar("pm_tick_budget_ms", "2.5", FCVAR_ARCHIVE, "Global frame budget (ms)")
-local cv_trace        = CreateConVar("pm_trace", "0", FCVAR_ARCHIVE, "Trace scheduling decisions")
+local cv_enabled   = CreateConVar("pm_enabled", "1", FCVAR_ARCHIVE, "Enable PerfMesh")
+local cv_debug     = CreateConVar("pm_debug", "0", FCVAR_ARCHIVE, "Debug logs")
+local cv_budget_ms = CreateConVar("pm_tick_budget_ms", "2.5", FCVAR_ARCHIVE, "Global frame budget (ms)")
+local cv_trace     = CreateConVar("pm_trace", "0", FCVAR_ARCHIVE, "Trace scheduling decisions")
 
 local function dbg(...) if cv_debug:GetBool() then print(PM.__tag, ...) end end
 
--- ===== Pub/Sub =====
+-- Pub/Sub
 PM.subs = PM.subs or {}
 function PM.Subscribe(ch, id, fn, prio)
     if not cv_enabled:GetBool() then return end
@@ -39,7 +38,7 @@ function PM.Publish(ch, payload)
     for _,s in ipairs(t) do local ok,err=pcall(s.fn, payload); if not ok then dbg("Publish err", ch, s.id, err) end end
 end
 
--- ===== Services =====
+-- Services
 PM.services = PM.services or {}
 function PM.Offer(name, provider_id, api, prio)
     assert(type(name)=="string" and name~="", "service name")
@@ -54,7 +53,7 @@ function PM.Offer(name, provider_id, api, prio)
 end
 function PM.GetService(name) local s=PM.services[name]; return s and s.api or nil end
 
--- ===== Claims (priority mutex) =====
+-- Claims
 PM.claims = PM.claims or {}
 function PM.Claim(resource, id, prio, ttl)
     assert(type(resource)=="string" and resource~="", "resource")
@@ -72,14 +71,14 @@ end
 function PM.Heartbeat(resource, id, ttl) local c=PM.claims[resource]; if c and c.holder==id then c.ttl=CurTime()+(ttl or 5) return true end end
 function PM.Release(resource, id) local c=PM.claims[resource]; if c and c.holder==id then PM.claims[resource]=nil; PM.Publish("perfmesh:claim_changed",{resource=resource,holder=nil}) return true end end
 
--- ===== Metrics =====
+-- Metrics
 PM.metrics = PM.metrics or {counters={}, gauges={}, ema={}}
 local function ema(old, new, a) if old==nil then return new end return old*(1-a)+new*a end
 function PM.MetricInc(k, d) PM.metrics.counters[k]=(PM.metrics.counters[k] or 0)+(d or 1) end
 function PM.MetricSet(k, v) PM.metrics.gauges[k]=v end
 function PM.MetricEma(k, v, a) PM.metrics.ema[k]=ema(PM.metrics.ema[k], v, a or 0.2) end
 
--- ===== Scheduler v2 =====
+-- Scheduler v2
 PM.jobs = PM.jobs or {}
 function PM.JobRegister(id, fn, opts)
     assert(type(id)=="string" and id~="", "job id")
@@ -87,9 +86,8 @@ function PM.JobRegister(id, fn, opts)
     opts = opts or {}
     local hz   = math.max(0.1, tonumber(opts.hz or 10) or 10)
     local prio = tonumber(opts.prio or 0) or 0
-    local slice_ms = tonumber(opts.slice_ms or 0.2) or 0.2 -- hard cap per tick for this job
+    local slice_ms = tonumber(opts.slice_ms or 0.2) or 0.2
     PM.jobs[id] = {fn=fn,hz=hz,prio=prio,next_t=CurTime(),slice_ms=slice_ms,avg_ms=0}
-    dbg("Job reg", id, "hz",hz,"prio",prio,"slice",slice_ms)
 end
 function PM.JobUnregister(id) PM.jobs[id]=nil end
 
@@ -99,7 +97,6 @@ hook.Add("Think","PerfMesh_Scheduler2", function()
     local t0 = SysTime()
     local now = CurTime()
 
-    -- sort by prio
     local list = {}
     for id,j in pairs(PM.jobs) do list[#list+1]={id=id,j=j} end
     table.sort(list, function(a,b) return a.j.prio>b.j.prio end)
@@ -117,16 +114,13 @@ hook.Add("Think","PerfMesh_Scheduler2", function()
             used_ms = (SysTime()-t0)*1000.0
             PM.MetricEma("sched.job_ms."..item.id, dur_ms, 0.2)
             if cv_trace:GetBool() then print(PM.__tag, "job", item.id, string.format("%.3fms", dur_ms)) end
-            if dur_ms > j.slice_ms then
-                -- Slow job: reduce its frequency slightly to avoid thrash
-                j.hz = math.max(0.1, j.hz*0.9)
-            end
+            if dur_ms > j.slice_ms then j.hz = math.max(0.1, j.hz*0.9) end
         end
     end
     PM.MetricEma("sched.used_ms", used_ms, 0.2)
 end)
 
--- ===== Commands =====
+-- Commands
 concommand.Add("perfmesh_status", function(ply)
     if IsValid(ply) and not ply:IsAdmin() then return end
     print(PM.__tag, "v"..PM.__v, "enabled=", cv_enabled:GetBool(), "jobs=", table.Count(PM.jobs))
@@ -136,7 +130,6 @@ concommand.Add("perfmesh_status", function(ply)
     for r,c in pairs(PM.claims or {}) do print("  -",r,"->",c.holder,"prio",c.prio) end
     print(string.format(" Budget=%.2fms Used(ema)=%.2fms", cv_budget_ms:GetFloat(), PM.metrics.ema["sched.used_ms"] or 0))
 end)
-
 concommand.Add("perfmesh_metrics", function(ply)
     if IsValid(ply) and not ply:IsAdmin() then return end
     print(PM.__tag, "metrics:")
