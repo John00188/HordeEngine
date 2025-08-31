@@ -1,0 +1,29 @@
+name: perfmesh
+
+on:
+  push:
+    paths:
+      - 'experiments/perfmesh_v2/**'
+      - '.github/workflows/perfmesh.yml'
+  pull_request:
+    paths:
+      - 'experiments/perfmesh_v2/**'
+      - '.github/workflows/perfmesh.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Lua lint
+        run: |
+          which luacheck && luacheck experiments/perfmesh_v2/addon/lua || echo "luacheck not installed"
+          which stylua && stylua --check experiments/perfmesh_v2/addon/lua || echo "stylua not installed"
+      - name: Zip addon
+        run: |
+          cd experiments/perfmesh_v2
+          zip -r perfmesh_v2.zip addon
+      - uses: actions/upload-artifact@v3
+        with:
+          name: perfmesh_v2
+          path: experiments/perfmesh_v2/perfmesh_v2.zip

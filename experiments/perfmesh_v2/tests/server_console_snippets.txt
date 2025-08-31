@@ -1,0 +1,19 @@
+# Preset demo
+perfmesh_preset balanced
+perfmesh_preset aggressive
+perfmesh_preset cinematic
+# observe pm_policy_status
+
+# Hold demo
+pm_pid_hold 1
+# confirm UI badge + no actuator changes
+pm_pid_hold 0
+
+# Export/Dump demo
+perfmesh_export_metrics
+perfmesh_dump_state
+# verify files appear under garrysmod/data/perfmesh_v2/
+
+# Validation
+perfmesh_metrics
+# check sched.used_ms values update
