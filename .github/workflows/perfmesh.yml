@@ -1,4 +1,4 @@
-﻿name: perfmesh-artifacts
+name: perfmesh-artifacts
 on:
   push:
     branches: [ 'codex/perfmesh-v2' ]

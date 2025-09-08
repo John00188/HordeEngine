@@ -1,20 +1,24 @@
-﻿-- PerfMesh v0.2.0 (server) — control-plane scheduler + bus + metrics
+-- PerfMesh v0.2.1 (server core) — control-plane scheduler + bus + metrics
 if not SERVER then return end
-if _G.PerfMesh and _G.PerfMesh.__v == "0.2.0" then return end
+if _G.PerfMesh and _G.PerfMesh.__v == "0.2.1" then return end
 
 local PM = _G.PerfMesh or {}
 PM.__v   = "0.2.1"
 PM.__tag = "[PerfMesh]"
 PM.debug = false
 
+-- ConVars
 local cv_enabled   = CreateConVar("pm_enabled", "1", FCVAR_ARCHIVE, "Enable PerfMesh")
 local cv_debug     = CreateConVar("pm_debug", "0", FCVAR_ARCHIVE, "Debug logs")
 local cv_budget_ms = CreateConVar("pm_tick_budget_ms", "2.5", FCVAR_ARCHIVE, "Global frame budget (ms)")
 local cv_trace     = CreateConVar("pm_trace", "0", FCVAR_ARCHIVE, "Trace scheduling decisions")
+if not ConVarExists("pm_quiet") then
+  CreateConVar("pm_quiet","0",FCVAR_ARCHIVE,"PerfMesh quiet mode (0=verbose,1=quiet)")
+end
 
 local function dbg(...) if cv_debug:GetBool() then print(PM.__tag, ...) end end
 
--- Pub/Sub
+-- === Pub/Sub ===
 PM.subs = PM.subs or {}
 function PM.Subscribe(ch, id, fn, prio)
     if not cv_enabled:GetBool() then return end
@@ -38,7 +42,7 @@ function PM.Publish(ch, payload)
     for _,s in ipairs(t) do local ok,err=pcall(s.fn, payload); if not ok then dbg("Publish err", ch, s.id, err) end end
 end
 
--- Services
+-- === Services ===
 PM.services = PM.services or {}
 function PM.Offer(name, provider_id, api, prio)
     assert(type(name)=="string" and name~="", "service name")
@@ -53,7 +57,7 @@ function PM.Offer(name, provider_id, api, prio)
 end
 function PM.GetService(name) local s=PM.services[name]; return s and s.api or nil end
 
--- Claims
+-- === Claims ===
 PM.claims = PM.claims or {}
 function PM.Claim(resource, id, prio, ttl)
     assert(type(resource)=="string" and resource~="", "resource")
@@ -71,14 +75,14 @@ end
 function PM.Heartbeat(resource, id, ttl) local c=PM.claims[resource]; if c and c.holder==id then c.ttl=CurTime()+(ttl or 5) return true end end
 function PM.Release(resource, id) local c=PM.claims[resource]; if c and c.holder==id then PM.claims[resource]=nil; PM.Publish("perfmesh:claim_changed",{resource=resource,holder=nil}) return true end end
 
--- Metrics
+-- === Metrics ===
 PM.metrics = PM.metrics or {counters={}, gauges={}, ema={}}
 local function ema(old, new, a) if old==nil then return new end return old*(1-a)+new*a end
 function PM.MetricInc(k, d) PM.metrics.counters[k]=(PM.metrics.counters[k] or 0)+(d or 1) end
 function PM.MetricSet(k, v) PM.metrics.gauges[k]=v end
 function PM.MetricEma(k, v, a) PM.metrics.ema[k]=ema(PM.metrics.ema[k], v, a or 0.2) end
 
--- Scheduler v2
+-- === Scheduler v2 ===
 PM.jobs = PM.jobs or {}
 function PM.JobRegister(id, fn, opts)
     assert(type(id)=="string" and id~="", "job id")
@@ -120,7 +124,7 @@ hook.Add("Think","PerfMesh_Scheduler2", function()
     PM.MetricEma("sched.used_ms", used_ms, 0.2)
 end)
 
--- Commands
+-- === Commands ===
 concommand.Add("perfmesh_status", function(ply)
     if IsValid(ply) and not ply:IsAdmin() then return end
     print(PM.__tag, "v"..PM.__v, "enabled=", cv_enabled:GetBool(), "jobs=", table.Count(PM.jobs))
@@ -138,7 +142,7 @@ concommand.Add("perfmesh_metrics", function(ply)
     for k,v in pairs(PM.metrics.ema) do print(string.format(" ema %s = %.3f",k,v)) end
 end)
 
+-- finalize
 _G.PerfMesh = PM
 timer.Simple(0, function() PM.Publish("perfmesh:ready", {version=PM.__v}) end)
 print(PM.__tag, "loaded v"..PM.__v)
-

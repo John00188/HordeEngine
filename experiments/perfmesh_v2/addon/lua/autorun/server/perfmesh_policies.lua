@@ -1,8 +1,11 @@
-﻿-- PerfMesh v0.2 policies: ragdoll cap, npc pacing, shadows, adaptive tuning
+-- PerfMesh v0.2.1 policies: ragdoll cap, npc pacing, shadows, adaptive tuning
 if not SERVER then return end
+
+_G.PerfMesh = _G.PerfMesh or { __v = _G.PerfMesh and _G.PerfMesh.__v or "0.2.1" }
 local PM = _G.PerfMesh; if not PM then return end
 local TAG = "[PM-Policy]"
 
+-- ConVars
 local cv_enable_policies = CreateConVar("pm_policies", "1", FCVAR_ARCHIVE, "Enable PerfMesh policies")
 local cv_ragdoll_max     = CreateConVar("pm_ragdoll_max", "25", FCVAR_ARCHIVE, "Max ragdolls before trim")
 local cv_no_shadows      = CreateConVar("pm_npc_no_shadows", "1", FCVAR_ARCHIVE, "Disable NPC shadows on spawn")
@@ -13,11 +16,13 @@ local cv_cull_fov        = CreateConVar("pm_cull_out_of_fov", "1", FCVAR_ARCHIVE
 local cv_adaptive        = CreateConVar("pm_adaptive", "1", FCVAR_ARCHIVE, "Auto-tighten under load")
 local cv_aggr_level      = CreateConVar("pm_aggressiveness", "1", FCVAR_ARCHIVE, "0=gentle,1=normal,2=aggressive,3=max")
 
+-- State
 local managed, ragdolls = {}, {}
 local managed_idx = 1
 local function is_npc(ent) return IsValid(ent) and (ent:IsNPC() or (ent.IsNextBot and ent:IsNextBot())) end
-local function dbg(...) if GetConVar("pm_debug"):GetBool() then print(TAG, ...) end end
+local function dbg(...) if GetConVar("pm_debug") and GetConVar("pm_debug"):GetBool() then print(TAG, ...) end end
 
+-- Track ragdolls
 hook.Add("OnEntityCreated","PM_RagdollTrack", function(ent)
     if not cv_enable_policies:GetBool() then return end
     if not IsValid(ent) then return end
@@ -38,6 +43,7 @@ hook.Add("OnEntityCreated","PM_RagdollTrack", function(ent)
     end)
 end)
 
+-- Track NPCs
 hook.Add("OnEntityCreated","PM_NPCTrack", function(ent)
     if not cv_enable_policies:GetBool() then return end
     if not IsValid(ent) then return end
@@ -50,6 +56,7 @@ hook.Add("OnEntityCreated","PM_NPCTrack", function(ent)
     end)
 end)
 
+-- Helper: nearest player info
 local function nearest_player_info(ent)
     local best, oof = math.huge, true
     local pos = ent:GetPos()
@@ -66,6 +73,7 @@ local function nearest_player_info(ent)
     return math.sqrt(best), oof
 end
 
+-- NPC scan job
 PM.JobRegister("pm.policies.npc_scan", function()
     for i=#managed,1,-1 do if not IsValid(managed[i]) then table.remove(managed,i) end end
     PM.MetricSet("npc.tracked", #managed); PM.MetricSet("ragdolls.count", #ragdolls)
@@ -73,7 +81,7 @@ PM.JobRegister("pm.policies.npc_scan", function()
 
     local farDist = cv_far_distance:GetFloat()
     local near_dt = 1.0/math.max(1, cv_hz_near:GetInt())
-    local far_dt  = 1.0/math.max(0.1, cv_hz_far:GetFloat())
+    local far_dt  = 1.0/math.max(0.1, cv_hz_far:GetInt())
     local use_fov = cv_cull_fov:GetBool()
 
     local start = SysTime()
@@ -100,6 +108,7 @@ PM.JobRegister("pm.policies.npc_scan", function()
     end
 end, {hz=10, prio=10, slice_ms=0.9})
 
+-- Adaptive policy job
 PM.JobRegister("pm.policies.adaptive", function()
     if not cv_adaptive:GetBool() then return end
     local used = PM.metrics.ema["sched.used_ms"] or 0
@@ -125,6 +134,7 @@ PM.JobRegister("pm.policies.adaptive", function()
     end
 end, {hz=2, prio=20, slice_ms=0.3})
 
+-- Status command
 concommand.Add("pm_policy_status", function(ply)
     if IsValid(ply) and not ply:IsAdmin() then return end
     print(TAG, "policies=", cv_enable_policies:GetBool(),
