@@ -6,6 +6,7 @@ namespace he
 {
     struct Frame
     {
+        // Timestamp of the last update in milliseconds since a steady clock epoch
         std::uint64_t timestamp_ms = 0;
         std::uint32_t seq = 0;
     };
