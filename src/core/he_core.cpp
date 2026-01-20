@@ -35,6 +35,8 @@ namespace he
     // simple CPU-bound benchmark to prove native call + timing
     double Bench(size_t iters)
     {
+        g_jobs_enqueued.fetch_add(1, std::memory_order_relaxed);
+
         auto t0 = Clock::now();
         volatile double acc = 0.0;
         for (size_t i = 0; i < iters; ++i) {
@@ -42,6 +44,7 @@ namespace he
         }
         auto t1 = Clock::now();
         (void)acc;
+        g_jobs_executed.fetch_add(1, std::memory_order_relaxed);
         return std::chrono::duration<double, std::milli>(t1 - t0).count();
     }
 }
