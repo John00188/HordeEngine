@@ -29,6 +29,14 @@ function(he_set_out tgt)
     ARCHIVE_OUTPUT_DIRECTORY "${_out}")
 endfunction()
 
+# --- Shared core ---
+add_library(he_core STATIC
+  src/core/he_core.cpp
+)
+target_include_directories(he_core PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
 # --- Client DLL ---
 add_library(gmcl_hordeengine_win64 SHARED
   src/client/module_client.cpp
@@ -36,8 +44,8 @@ add_library(gmcl_hordeengine_win64 SHARED
 target_compile_definitions(gmcl_hordeengine_win64 PRIVATE GMOD_CLIENT)
 target_include_directories(gmcl_hordeengine_win64 PRIVATE
   ${gmod-module-base_SOURCE_DIR}/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+target_link_libraries(gmcl_hordeengine_win64 PRIVATE he_core)
 set_target_properties(gmcl_hordeengine_win64 PROPERTIES OUTPUT_NAME "gmcl_hordeengine_win64")
 he_set_out(gmcl_hordeengine_win64)
 
@@ -48,7 +56,7 @@ add_library(gmsv_hordeengine_win64 SHARED
 target_compile_definitions(gmsv_hordeengine_win64 PRIVATE GMOD_SERVER)
 target_include_directories(gmsv_hordeengine_win64 PRIVATE
   ${gmod-module-base_SOURCE_DIR}/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+target_link_libraries(gmsv_hordeengine_win64 PRIVATE he_core)
 set_target_properties(gmsv_hordeengine_win64 PROPERTIES OUTPUT_NAME "gmsv_hordeengine_win64")
 he_set_out(gmsv_hordeengine_win64)
