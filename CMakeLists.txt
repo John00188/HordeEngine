@@ -21,7 +21,7 @@ file(GLOB_RECURSE SRC_CORE   CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/core/*.c
 
 # Top-level .cpp files (exclude the two entry files; we'll add the chosen one back)
 file(GLOB ROOT_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/*.cpp")
-list(FILTER ROOT_CPP EXCLUDE REGEX ".*/(minimal_only|hordeengine_server|hordeengine_min)\\.cpp$")
+list(FILTER ROOT_CPP EXCLUDE REGEX ".*/(minimal_only|hordeengine_server|hordeengine_min|hordeengine_module)\\.cpp$")
 
 # Entry files (exactly one must be compiled)
 set(ENTRY_MIN "${CMAKE_SOURCE_DIR}/minimal_only.cpp")
