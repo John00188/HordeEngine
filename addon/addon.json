@@ -1,0 +1,7 @@
+{
+  "title" : "HordeEngine",
+  "description" : "A performance-oriented backend module for Garry's Mod that enables large-scale NPC spawning with minimal performance impact.",
+  "author" : "John00188",
+  "version" : "1.0.0",
+  "type" : "tool"
+}
