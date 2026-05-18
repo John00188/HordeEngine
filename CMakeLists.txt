@@ -82,6 +82,7 @@ function(add_horde_target tgt gmdef out_subdir)
   target_include_directories(${tgt} PRIVATE
     "${CMAKE_SOURCE_DIR}"
     "${CMAKE_SOURCE_DIR}/include"
+    "${CMAKE_SOURCE_DIR}/external/include"
     "${CMAKE_SOURCE_DIR}/src"
     "${CMAKE_SOURCE_DIR}/src/server"
     "${CMAKE_SOURCE_DIR}/src/core"
