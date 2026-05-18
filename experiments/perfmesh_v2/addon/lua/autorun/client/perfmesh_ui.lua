@@ -1,4 +1,6 @@
-﻿if not CLIENT then return end
+-- PerfMesh UI (resolved merge)
+if not CLIENT then return end
+_G.PerfMesh = _G.PerfMesh or { __v = _G.PerfMesh and _G.PerfMesh.__v or "0.2.1" }
 
 local UI = {}
 UI.hist = {}
@@ -6,21 +8,22 @@ UI.maxHist = 120
 UI.last = { used = 0, budget = 4, hold=false, quiet=false, ragdolls=0, npc=0, preset="balanced" }
 
 -- receive live metrics from server
-net.Receive("perfmesh_metrics2", function()
-  UI.last.used   = net.ReadFloat()
-  UI.last.budget = net.ReadFloat()
-  UI.last.hold   = net.ReadUInt(1) == 1
-  UI.last.quiet  = net.ReadUInt(1) == 1
-  UI.last.ragdolls = net.ReadUInt(16)
-  UI.last.npc      = net.ReadUInt(16)
-  UI.last.preset   = net.ReadString()
+if net then
+  net.Receive("perfmesh_metrics2", function()
+    UI.last.used     = net.ReadFloat()
+    UI.last.budget   = net.ReadFloat()
+    UI.last.hold     = net.ReadUInt(1) == 1
+    UI.last.quiet    = net.ReadUInt(1) == 1
+    UI.last.ragdolls = net.ReadUInt(16)
+    UI.last.npc      = net.ReadUInt(16)
+    UI.last.preset   = net.ReadString()
 
-  table.insert(UI.hist, UI.last.used)
-  if #UI.hist > UI.maxHist then table.remove(UI.hist, 1) end
+    table.insert(UI.hist, UI.last.used)
+    if #UI.hist > UI.maxHist then table.remove(UI.hist, 1) end
 
-  -- live-refresh labels if panel is open
-  if IsValid(UI.frame) then UI:updateLabels() end
-end)
+    if IsValid(UI.frame) then UI:updateLabels() end
+  end)
+end
 
 -- fonts
 surface.CreateFont("PM_Title",  { font="Tahoma", size=20, weight=800 })
@@ -34,26 +37,24 @@ local function Sparkline(parent)
   pnl.Paint = function(self,w,h)
     surface.SetDrawColor(20,20,25,230)
     surface.DrawRect(0,0,w,h)
-    -- axes
     surface.SetDrawColor(60,60,70,255)
     surface.DrawLine(0,h-1,w,h-1)
-    -- draw history
+
     local B = math.max(0.1, UI.last.budget or 4)
     local n = #UI.hist
     if n < 2 then return end
     local step = w / (UI.maxHist-1)
     surface.SetDrawColor(255,255,255,255)
-    local lastx, lasty
+    local lx, ly
     for i=1,n do
       local v = math.Clamp(UI.hist[i]/B, 0, 1)
       local x = (i-1) * step
       local y = h - v*h
-      if lastx then surface.DrawLine(lastx,lasty,x,y) end
-      lastx, lasty = x, y
+      if lx then surface.DrawLine(lx,ly,x,y) end
+      lx, ly = x, y
     end
-    -- budget line
-    local by = h - math.Clamp(1.0,0,1)*h
     surface.SetDrawColor(120,180,255,180)
+    local by = h - math.Clamp(1.0,0,1)*h
     surface.DrawLine(0, by, w, by)
   end
   return pnl
@@ -104,7 +105,7 @@ local function BuildUI()
   f.Paint = function(self,w,h)
     surface.SetDrawColor(25,25,30,245)
     surface.DrawRect(0,0,w,h)
-    draw.SimpleText("PerfMesh v0.2.1", "PM_Title", 12, 8, Color(255,255,255))
+    draw.SimpleText("PerfMesh v"..(_G.PerfMesh.__v or "0.2.1"), "PM_Title", 12, 8, Color(255,255,255))
   end
   UI.frame = f
 
@@ -125,7 +126,6 @@ local function BuildUI()
   spark:SetPos(12, y0+72)
   spark:SetWide(436)
 
-  -- Preset cycle button
   UI.btnPreset = vgui.Create("DButton", f)
   UI.btnPreset:SetPos(12, y0+124)
   UI.btnPreset:SetSize(140, 28)
@@ -139,7 +139,6 @@ local function BuildUI()
     RunConsoleCommand("perfmesh_preset", nextn)
   end
 
-  -- Quiet toggle
   UI.btnQuiet = vgui.Create("DButton", f)
   UI.btnQuiet:SetPos(168, y0+124)
   UI.btnQuiet:SetSize(120, 28)
@@ -148,7 +147,6 @@ local function BuildUI()
     RunConsoleCommand("pm_quiet", UI.last.quiet and "0" or "1")
   end
 
-  -- Export / Dump
   local btnCSV = vgui.Create("DButton", f)
   btnCSV:SetPos(300, y0+124)
   btnCSV:SetSize(70, 28)
@@ -161,7 +159,6 @@ local function BuildUI()
   btnDump:SetText("Dump")
   btnDump.DoClick = function() RunConsoleCommand("perfmesh_dump_state") end
 
-  -- footer hint
   local hint = vgui.Create("DLabel", f)
   hint:SetPos(12, 282)
   hint:SetFont("PM_Small")
@@ -171,11 +168,12 @@ local function BuildUI()
   UI:updateLabels()
 end
 
--- console toggle
+-- console commands
 concommand.Add("perfmesh_ui_toggle", function()
-  if IsValid(UI.frame) then
-    UI.frame:Close()
-  else
-    BuildUI()
-  end
+  if IsValid(UI.frame) then UI.frame:Close() else BuildUI() end
+end)
+
+-- alias for backwards compatibility
+concommand.Add("perfmesh_ui", function()
+  if IsValid(UI.frame) then UI.frame:Close() else BuildUI() end
 end)
